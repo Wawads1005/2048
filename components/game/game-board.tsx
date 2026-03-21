@@ -50,7 +50,7 @@ function GameBoard({
     >
       <div
         className={cn(
-          "relative bg-game-board h-(--game-board-dimension-height) w-(--game-board-dimension-width) rounded-[calc(var(--game-board-dimension-offset)-var(--spacing))]",
+          "bg-game-board relative h-(--game-board-dimension-height) w-(--game-board-dimension-width) rounded-[calc(var(--game-board-dimension-offset)-var(--spacing))]",
           className,
         )}
         {...props}
@@ -94,7 +94,7 @@ function GameBoardCell({
     >
       <div
         className={cn(
-          "bg-game-board-cell h-(--game-board-cell-dimension-height) w-(--game-board-cell-dimension-width) absolute rounded-[calc(var(--game-board-dimension-offset)-var(--spacing))] translate-x-(--game-board-cell-position-x) translate-y-(--game-board-cell-position-y) z-0",
+          "bg-game-board-cell absolute z-0 h-(--game-board-cell-dimension-height) w-(--game-board-cell-dimension-width) translate-x-(--game-board-cell-position-x) translate-y-(--game-board-cell-position-y) rounded-[calc(var(--game-board-dimension-offset)-var(--spacing))]",
           className,
         )}
         {...props}
@@ -116,12 +116,12 @@ function GameBoardTile({
   return (
     <GameBoardCell
       className={cn(
-        "z-10 bg-primary text-primary-foreground flex justify-center items-center",
+        "bg-primary text-primary-foreground z-10 flex items-center justify-center",
         className,
       )}
       {...props}
     >
-      <span className="font-semibold leading-[calc(var(--game-board-cell-dimension-height)/2)] text-[calc(var(--game-board-cell-dimension-width)/2)]">
+      <span className="text-[calc(var(--game-board-cell-dimension-width)/2)] leading-[calc(var(--game-board-cell-dimension-height)/2)] font-semibold">
         {value}
       </span>
     </GameBoardCell>

@@ -9,7 +9,7 @@ function Homepage() {
   const { cells, tiles, rows, columns } = useGameBoard();
 
   return (
-    <div className="min-h-screen grid place-items-center">
+    <div className="grid min-h-screen place-items-center">
       <GameBoard rows={rows} columns={columns}>
         {cells.map((cell) => {
           return (
