@@ -6,12 +6,12 @@ import {
 } from "@/components/game/game-board";
 
 function Homepage() {
-  const [columns] = React.useState(4);
   const [rows] = React.useState(4);
+  const [columns] = React.useState(4);
 
   return (
     <div className="min-h-screen grid place-items-center">
-      <GameBoard>
+      <GameBoard rows={rows} columns={columns}>
         {Array.from({ length: rows * columns }, (_, i) => {
           const column = Math.floor(i / columns) + 1;
           const row = (i % rows) + 1;

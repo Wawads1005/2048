@@ -8,15 +8,6 @@ const GAME_BOARD_CELL_DIMENSION_WIDTH = 120;
 const GAME_BOARD_CELL_DIMENSION_HEIGHT = 120;
 
 const GAME_BOARD_DIMENSION_OFFSET = 12;
-const GAME_BOARD_DIMENSION_WIDTH =
-  (GAME_BOARD_CELL_DIMENSION_WIDTH + GAME_BOARD_DIMENSION_OFFSET) *
-    GAME_BOARD_COLUMNS +
-  GAME_BOARD_DIMENSION_OFFSET;
-
-const GAME_BOARD_DIMENSION_HEIGHT =
-  (GAME_BOARD_CELL_DIMENSION_HEIGHT + GAME_BOARD_DIMENSION_OFFSET) *
-    GAME_BOARD_ROWS +
-  GAME_BOARD_DIMENSION_OFFSET;
 
 interface GameBoardDimension {
   height: number;
@@ -25,18 +16,27 @@ interface GameBoardDimension {
 }
 
 interface GameBoardProps extends React.ComponentProps<"div"> {
-  dimension?: GameBoardDimension;
+  rows?: number;
+  columns?: number;
 }
 
 function GameBoard({
-  dimension = {
-    height: GAME_BOARD_DIMENSION_HEIGHT,
-    width: GAME_BOARD_DIMENSION_WIDTH,
-    offset: GAME_BOARD_DIMENSION_OFFSET,
-  },
+  rows = GAME_BOARD_ROWS,
+  columns = GAME_BOARD_COLUMNS,
   className,
   ...props
 }: GameBoardProps) {
+  const dimension: GameBoardDimension = {
+    width:
+      (GAME_BOARD_CELL_DIMENSION_WIDTH + GAME_BOARD_DIMENSION_OFFSET) *
+        columns +
+      GAME_BOARD_DIMENSION_OFFSET,
+    offset: GAME_BOARD_DIMENSION_OFFSET,
+    height:
+      (GAME_BOARD_CELL_DIMENSION_HEIGHT + GAME_BOARD_DIMENSION_OFFSET) * rows +
+      GAME_BOARD_DIMENSION_OFFSET,
+  };
+
   return (
     <div
       className="inline-flex"
@@ -67,19 +67,20 @@ interface GameBoardCellDimension {
 interface GameBoardCellProps extends React.ComponentProps<"div"> {
   row: number;
   column: number;
-  dimension?: GameBoardCellDimension;
 }
 
 function GameBoardCell({
   row,
   column,
-  dimension = {
-    height: GAME_BOARD_CELL_DIMENSION_HEIGHT,
-    width: GAME_BOARD_CELL_DIMENSION_WIDTH,
-  },
+
   className,
   ...props
 }: GameBoardCellProps) {
+  const dimension: GameBoardCellDimension = {
+    height: GAME_BOARD_CELL_DIMENSION_HEIGHT,
+    width: GAME_BOARD_CELL_DIMENSION_WIDTH,
+  };
+
   return (
     <div
       style={
