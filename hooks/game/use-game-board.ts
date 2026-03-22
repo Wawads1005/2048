@@ -72,11 +72,21 @@ function useGameBoard({
     return sortedTiles;
   }
 
+  function groupTiles(tiles: Game.GameTile[], isHorizontal: boolean) {
+    const groupFn = (tile: Game.GameTile) =>
+      isHorizontal ? tile.row : tile.column;
+
+    const groupedTiles = Object.groupBy(tiles, groupFn);
+
+    return groupedTiles;
+  }
+
   return {
     tiles,
     cells,
     rows,
     columns,
+    setTiles,
   };
 }
 
