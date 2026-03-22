@@ -24,10 +24,10 @@ function useGameBoard({
     [rows, columns],
   );
 
-  function getEmptyCells(cells: Game.GameCell[]) {
-    const emptyCells = cells.filter(
+  function getEmptyCells(allCells: Game.GameCell[], allTiles: Game.GameTile[]) {
+    const emptyCells = allCells.filter(
       (cell) =>
-        !tiles.some(
+        !allTiles.some(
           (tile) => tile.column === cell.column && tile.row === cell.row,
         ),
     );
@@ -36,12 +36,8 @@ function useGameBoard({
   }
 
   function getRandomEmptyCell(emptyCells: Game.GameCell[]) {
-    const randomCell =
-      emptyCells[Math.floor(Math.random() * emptyCells.length)];
-
-    if (!randomCell) {
-      return null;
-    }
+    const randomIndex = Math.floor(Math.random() * emptyCells.length);
+    const randomCell = emptyCells[randomIndex] ?? null;
 
     return randomCell;
   }
@@ -57,24 +53,32 @@ function useGameBoard({
     return randomTile;
   }
 
-  function spawnTile() {
-    const emptyCells = getEmptyCells(cells);
-    const randomCell = getRandomEmptyCell(emptyCells);
+  function spawnTile(count: number = 1) {
+    setTiles((oldTiles) => {
+      let nextTiles = [...oldTiles];
 
-    if (!randomCell) {
-      return;
-    }
+      for (let index = 0; index < count; index++) {
+        const emptyCells = getEmptyCells(cells, nextTiles);
+        const randomCell = getRandomEmptyCell(emptyCells);
 
-    const randomTile = createRandomTile(randomCell);
+        if (!randomCell) {
+          break;
+        }
 
-    setTiles((oldTiles) => [...oldTiles, randomTile]);
+        const randomTile = createRandomTile(randomCell);
+
+        nextTiles = [...nextTiles, randomTile];
+      }
+
+      return nextTiles;
+    });
   }
 
   React.useEffect(() => {
     let initialized = false;
 
     if (!initialized) {
-      spawnTile();
+      spawnTile(2);
 
       initialized = true;
     }
