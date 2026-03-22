@@ -24,8 +24,8 @@ function useGameBoard({
     [rows, columns],
   );
 
-  function getEmptyCells(allCells: Game.GameCell[], allTiles: Game.GameTile[]) {
-    const emptyCells = allCells.filter(
+  function getEmptyCells(allTiles: Game.GameTile[]) {
+    const emptyCells = cells.filter(
       (cell) =>
         !allTiles.some(
           (tile) => tile.column === cell.column && tile.row === cell.row,
@@ -58,7 +58,7 @@ function useGameBoard({
       let nextTiles = [...oldTiles];
 
       for (let index = 0; index < count; index++) {
-        const emptyCells = getEmptyCells(cells, nextTiles);
+        const emptyCells = getEmptyCells(nextTiles);
         const randomCell = getRandomEmptyCell(emptyCells);
 
         if (!randomCell) {
