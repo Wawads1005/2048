@@ -121,7 +121,7 @@ function GameBoardTile({
       )}
       {...props}
     >
-      <span className="text-[calc(var(--game-board-cell-dimension-width)/2)] leading-[calc(var(--game-board-cell-dimension-height)/2)] font-semibold">
+      <span className="animate-spawn origin-center text-[calc(var(--game-board-cell-dimension-width)/2)] leading-[calc(var(--game-board-cell-dimension-height)/2)] font-semibold transition-transform">
         {value}
       </span>
     </GameBoardCell>

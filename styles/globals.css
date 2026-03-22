@@ -46,6 +46,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
   --color-game-board: var(--game-board);
   --color-game-board-cell: var(--game-board-cell);
+  --animate-spawn: spawn 0.5s ease-out;
 }
 
 :root {
@@ -80,5 +81,14 @@
   }
   html {
     @apply font-sans;
+  }
+
+  @keyframes spawn {
+    0% {
+      scale: 0;
+    }
+    100% {
+      scale: 1;
+    }
   }
 }
