@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   GameBoard,
   GameBoardCell,
@@ -7,6 +8,25 @@ import { useGameBoard } from "@/hooks/game/use-game-board";
 
 function Homepage() {
   const gameBoard = useGameBoard();
+
+  React.useEffect(() => {
+    function handleMove(e: KeyboardEvent) {
+      gameBoard.setTiles((tiles) => {
+        if (e.key === "ArrowRight") return gameBoard.moveTiles(tiles, "right");
+        if (e.key === "ArrowLeft") return gameBoard.moveTiles(tiles, "left");
+        if (e.key === "ArrowUp") return gameBoard.moveTiles(tiles, "up");
+        if (e.key === "ArrowDown") return gameBoard.moveTiles(tiles, "down");
+
+        return tiles;
+      });
+    }
+
+    document.addEventListener("keydown", handleMove);
+
+    return () => {
+      document.removeEventListener("keydown", handleMove);
+    };
+  }, []);
 
   return (
     <div className="grid min-h-screen place-items-center">
