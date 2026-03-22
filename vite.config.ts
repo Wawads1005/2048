@@ -7,7 +7,7 @@ import path from "node:path";
 const config = defineConfig({
   plugins: [
     react(),
-    babel({ presets: [reactCompilerPreset()] }),
+    // babel({ presets: [reactCompilerPreset()] }),
     tailwindcss(),
   ],
   resolve: {

@@ -2,22 +2,27 @@ import * as React from "react";
 
 const DEFAULT_GAME_BOARD_ROWS = 4;
 const DEFAULT_GAME_BOARD_COLUMNS = 4;
+const DEFAULT_GAME_BOARD_STARTING_TILE = 2;
 
-interface UseGameBoardProps {
+type UseGameBoardProps = {
   rows?: number;
   columns?: number;
-}
+  startingTile?: number;
+};
+
+type Direction = "right" | "left" | "up" | "down";
 
 function useGameBoard({
   rows = DEFAULT_GAME_BOARD_ROWS,
   columns = DEFAULT_GAME_BOARD_COLUMNS,
+  startingTile = DEFAULT_GAME_BOARD_STARTING_TILE,
 }: UseGameBoardProps = {}) {
   const [tiles, setTiles] = React.useState<Game.GameTile[]>([]);
   const cells = React.useMemo(
     () =>
       Array.from({ length: rows * columns }, (_, i) => {
-        const column = Math.floor(i / columns) + 1;
-        const row = (i % rows) + 1;
+        const column = (i % columns) + 1;
+        const row = Math.floor(i / rows) + 1;
 
         return { column, row };
       }),
@@ -35,7 +40,7 @@ function useGameBoard({
     return emptyCells;
   }
 
-  function getRandomEmptyCell(emptyCells: Game.GameCell[]) {
+  function getRandomCell(emptyCells: Game.GameCell[]) {
     const randomIndex = Math.floor(Math.random() * emptyCells.length);
     const randomCell = emptyCells[randomIndex] ?? null;
 
@@ -53,40 +58,19 @@ function useGameBoard({
     return randomTile;
   }
 
-  function spawnTile(count: number = 1) {
-    setTiles((oldTiles) => {
-      let nextTiles = [...oldTiles];
+  function sortTiles(tiles: Game.GameTile[], direction: Direction) {
+    const sortFn = (a: Game.GameTile, b: Game.GameTile) => {
+      if (direction === "left") return a.column - b.column;
+      if (direction === "right") return b.column - a.column;
+      if (direction === "up") return a.row - b.row;
 
-      for (let index = 0; index < count; index++) {
-        const emptyCells = getEmptyCells(nextTiles);
-        const randomCell = getRandomEmptyCell(emptyCells);
-
-        if (!randomCell) {
-          break;
-        }
-
-        const randomTile = createRandomTile(randomCell);
-
-        nextTiles = [...nextTiles, randomTile];
-      }
-
-      return nextTiles;
-    });
-  }
-
-  React.useEffect(() => {
-    let initialized = false;
-
-    if (!initialized) {
-      spawnTile(2);
-
-      initialized = true;
-    }
-
-    return () => {
-      initialized = false;
+      return b.row - a.row;
     };
-  }, []);
+
+    const sortedTiles = tiles.toSorted(sortFn);
+
+    return sortedTiles;
+  }
 
   return {
     tiles,
