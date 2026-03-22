@@ -81,12 +81,113 @@ function useGameBoard({
     return groupedTiles;
   }
 
+  function mergeTiles(
+    currentTile: Game.GameTile,
+    nextTile: Game.GameTile,
+    row: number,
+    column: number,
+  ) {
+    const tile: Game.GameTile = {
+      ...currentTile,
+      value: currentTile.value + nextTile.value,
+      row,
+      column,
+    };
+
+    return tile;
+  }
+
+  function moveTiles(tiles: Game.GameTile[], direction: Direction) {
+    const isHorizontal = direction === "left" || direction === "right";
+    const maximumPosition = isHorizontal ? columns : rows;
+
+    const sortedTiles = sortTiles(tiles, direction);
+    const groupedTiles = groupTiles(sortedTiles, isHorizontal);
+
+    let nextTiles: Game.GameTile[] = [];
+    let hasMoved = false;
+
+    for (const [group, currentTiles = []] of Object.entries(groupedTiles)) {
+      const currentPosition = parseInt(group, 10);
+      let nextPosition =
+        direction === "left" || direction === "up" ? 1 : maximumPosition;
+
+      while (currentTiles.length > 0) {
+        const currentTile = currentTiles.shift()!;
+        const nextTile = currentTiles[0];
+
+        if (nextTile && nextTile.value === currentTile.value) {
+          hasMoved = true;
+
+          currentTiles.shift();
+
+          const tile = mergeTiles(
+            currentTile,
+            nextTile,
+            isHorizontal ? currentPosition : nextPosition,
+            isHorizontal ? nextPosition : currentPosition,
+          );
+
+          nextTiles = [...nextTiles, tile];
+        } else {
+          const isMatched =
+            (isHorizontal && currentTile.column !== nextPosition) ||
+            (!isHorizontal && currentTile.row !== nextPosition);
+
+          if (isMatched) {
+            hasMoved = true;
+          }
+
+          const tile: Game.GameTile = {
+            ...currentTile,
+            row: isHorizontal ? currentPosition : nextPosition,
+            column: isHorizontal ? nextPosition : currentPosition,
+          };
+
+          nextTiles = [...nextTiles, tile];
+        }
+
+        nextPosition += direction === "left" || direction === "up" ? 1 : -1;
+      }
+    }
+
+    if (hasMoved) {
+      const emptyCells = getEmptyCells(nextTiles);
+      const randomCell = getRandomCell(emptyCells);
+
+      if (randomCell) {
+        const randomTile = createRandomTile(randomCell);
+        nextTiles = [...nextTiles, randomTile];
+      }
+    }
+
+    return nextTiles;
+  }
+
+  React.useEffect(() => {
+    setTiles((tiles) => {
+      for (let i = 0; i < startingTile; i++) {
+        const emptyCells = getEmptyCells(tiles);
+        const randomCell = getRandomCell(emptyCells);
+
+        if (randomCell) {
+          const randomTile = createRandomTile(randomCell);
+
+          tiles = [...tiles, randomTile];
+        }
+      }
+
+      return tiles;
+    });
+  }, []);
+
   return {
     tiles,
     cells,
     rows,
     columns,
     setTiles,
+    moveTiles,
   };
 }
 
