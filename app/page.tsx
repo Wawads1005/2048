@@ -5,6 +5,7 @@ import {
   GameBoardTile,
 } from "@/components/game/game-board";
 import { useGameBoard } from "@/hooks/game/use-game-board";
+import { tileColors } from "@/data/colors";
 
 function Homepage() {
   const gameBoard = useGameBoard();
@@ -47,6 +48,10 @@ function Homepage() {
               row={tile.row}
               column={tile.column}
               value={tile.value}
+              style={{
+                backgroundColor: tileColors[tile.value]?.background,
+                color: tileColors[tile.value]?.text,
+              }}
             />
           );
         })}
