@@ -6,12 +6,12 @@ import {
 import { useGameBoard } from "@/hooks/game/use-game-board";
 
 function Homepage() {
-  const { cells, tiles, rows, columns } = useGameBoard();
+  const gameBoard = useGameBoard();
 
   return (
     <div className="grid min-h-screen place-items-center">
-      <GameBoard rows={rows} columns={columns}>
-        {cells.map((cell) => {
+      <GameBoard rows={gameBoard.rows} columns={gameBoard.columns}>
+        {gameBoard.cells.map((cell) => {
           return (
             <GameBoardCell
               key={`${cell.column}-${cell.row}`}
@@ -20,7 +20,7 @@ function Homepage() {
             />
           );
         })}
-        {tiles.map((tile) => {
+        {gameBoard.tiles.map((tile) => {
           return (
             <GameBoardTile
               key={`${tile.column}-${tile.row}`}
