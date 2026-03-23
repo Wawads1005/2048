@@ -9,7 +9,7 @@ import { tileColors } from "@/data/colors";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Redo02Icon, Undo02Icon } from "@hugeicons/core-free-icons";
+import { Redo02Icon, RepeatIcon, Undo02Icon } from "@hugeicons/core-free-icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,6 +113,15 @@ function Homepage() {
             onClick={gameBoard.redo}
           >
             <HugeiconsIcon icon={Redo02Icon} />
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            onClick={() => {
+              gameBoard.reset();
+            }}
+          >
+            <HugeiconsIcon icon={RepeatIcon} />
           </Button>
         </ButtonGroup>
       </main>
