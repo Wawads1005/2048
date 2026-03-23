@@ -37,49 +37,69 @@ function Homepage() {
     };
   }, []);
 
+  function getHighestTileValue() {
+    const [highestestTile] = gameBoard.tiles.toSorted(
+      (a, b) => b.value - a.value,
+    );
+
+    const highestValue = highestestTile ? highestestTile.value : 0;
+
+    return highestValue;
+  }
+
   return (
-    <div className="grid min-h-screen place-items-center">
-      <GameBoard rows={gameBoard.rows} columns={gameBoard.columns}>
-        {gameBoard.cells.map((cell) => {
-          return (
-            <GameBoardCell
-              key={`${cell.column}-${cell.row}`}
-              column={cell.column}
-              row={cell.row}
-            />
-          );
-        })}
-        {gameBoard.tiles.map((tile) => {
-          return (
-            <GameBoardTile
-              key={`${tile.column}-${tile.row}`}
-              row={tile.row}
-              column={tile.column}
-              value={tile.value}
-              style={{
-                backgroundColor: tileColors[tile.value]?.background,
-                color: tileColors[tile.value]?.text,
-              }}
-            />
-          );
-        })}
-      </GameBoard>
-      <ButtonGroup>
-        <Button
-          size="icon-lg"
-          disabled={!gameBoard.canUndo}
-          onClick={gameBoard.undo}
-        >
-          <HugeiconsIcon icon={Undo02Icon} />
-        </Button>
-        <Button
-          size="icon-lg"
-          disabled={!gameBoard.canRedo}
-          onClick={gameBoard.redo}
-        >
-          <HugeiconsIcon icon={Redo02Icon} />
-        </Button>
-      </ButtonGroup>
+    <div className="space-y-4 md:space-y-8">
+      <header className="bg-background fixed inset-x-0 top-0 z-50 px-4 py-4 md:px-8">
+        <div className="container mx-auto flex h-[inherit] items-center justify-center gap-4 md:gap-8">
+          <div className="bg-secondary rounded-lg px-4 py-2 text-center">
+            <div className="text-sm font-semibold">SCORE</div>
+            <div className="font-extrabold">{getHighestTileValue()}</div>
+          </div>
+        </div>
+      </header>
+      <main className="container mx-auto flex min-h-screen flex-col items-center justify-center gap-4 md:gap-8">
+        <GameBoard rows={gameBoard.rows} columns={gameBoard.columns}>
+          {gameBoard.cells.map((cell) => {
+            return (
+              <GameBoardCell
+                key={`${cell.column}-${cell.row}`}
+                column={cell.column}
+                row={cell.row}
+              />
+            );
+          })}
+          {gameBoard.tiles.map((tile) => {
+            return (
+              <GameBoardTile
+                key={`${tile.column}-${tile.row}`}
+                row={tile.row}
+                column={tile.column}
+                value={tile.value}
+                style={{
+                  backgroundColor: tileColors[tile.value]?.background,
+                  color: tileColors[tile.value]?.text,
+                }}
+              />
+            );
+          })}
+        </GameBoard>
+        <ButtonGroup>
+          <Button
+            size="icon-lg"
+            disabled={!gameBoard.canUndo}
+            onClick={gameBoard.undo}
+          >
+            <HugeiconsIcon icon={Undo02Icon} />
+          </Button>
+          <Button
+            size="icon-lg"
+            disabled={!gameBoard.canRedo}
+            onClick={gameBoard.redo}
+          >
+            <HugeiconsIcon icon={Redo02Icon} />
+          </Button>
+        </ButtonGroup>
+      </main>
     </div>
   );
 }
