@@ -20,14 +20,14 @@ function Homepage() {
         gameBoard.undo();
       }
 
-      gameBoard.setTiles((tiles) => {
-        if (e.key === "ArrowRight") return gameBoard.moveTiles(tiles, "right");
-        if (e.key === "ArrowLeft") return gameBoard.moveTiles(tiles, "left");
-        if (e.key === "ArrowUp") return gameBoard.moveTiles(tiles, "up");
-        if (e.key === "ArrowDown") return gameBoard.moveTiles(tiles, "down");
+      if (e.ctrlKey && e.key === "y") {
+        gameBoard.redo();
+      }
 
-        return tiles;
-      });
+      if (e.key === "ArrowRight") return gameBoard.moveTiles("right");
+      if (e.key === "ArrowLeft") return gameBoard.moveTiles("left");
+      if (e.key === "ArrowUp") return gameBoard.moveTiles("up");
+      if (e.key === "ArrowDown") return gameBoard.moveTiles("down");
     }
 
     document.addEventListener("keydown", handleMove);
@@ -72,7 +72,11 @@ function Homepage() {
         >
           <HugeiconsIcon icon={Undo02Icon} />
         </Button>
-        <Button size="icon-lg">
+        <Button
+          size="icon-lg"
+          disabled={!gameBoard.canRedo}
+          onClick={gameBoard.redo}
+        >
           <HugeiconsIcon icon={Redo02Icon} />
         </Button>
       </ButtonGroup>

@@ -12,75 +12,91 @@ type UseGameBoardProps = {
 
 type Direction = "right" | "left" | "up" | "down";
 
+type GameBoardState = {
+  tiles: Game.GameTile[];
+  histories: Game.GameTile[][];
+  historyIndex: number;
+};
+
+type GameBoardAction =
+  | { type: "initialize"; tiles: Game.GameTile[] }
+  | { type: "move"; direction: Direction }
+  | { type: "undo" }
+  | { type: "redo" };
+
 function useGameBoard({
   rows = DEFAULT_GAME_BOARD_ROWS,
   columns = DEFAULT_GAME_BOARD_COLUMNS,
   startingTile = DEFAULT_GAME_BOARD_STARTING_TILE,
 }: UseGameBoardProps = {}) {
-  const historyIndexRef = React.useRef(0);
-  const historiesRef = React.useRef<Map<number, Game.GameTile[]>>(new Map());
-  const [tiles, setTiles] = React.useState<Game.GameTile[]>([]);
   const cells = React.useMemo(
     () =>
-      Array.from({ length: rows * columns }, (_, i) => {
-        const column = (i % columns) + 1;
-        const row = Math.floor(i / rows) + 1;
+      Array.from({ length: rows * columns }, (_, index) => {
+        const column = (index % columns) + 1;
+        const row = Math.floor(index / columns) + 1;
 
         return { column, row };
       }),
     [rows, columns],
   );
 
+  function cloneTiles(allTiles: Game.GameTile[]) {
+    return allTiles.map((tile) => ({ ...tile }));
+  }
+
   function getEmptyCells(allTiles: Game.GameTile[]) {
-    const emptyCells = cells.filter(
+    return cells.filter(
       (cell) =>
         !allTiles.some(
           (tile) => tile.column === cell.column && tile.row === cell.row,
         ),
     );
-
-    return emptyCells;
   }
 
   function getRandomCell(emptyCells: Game.GameCell[]) {
     const randomIndex = Math.floor(Math.random() * emptyCells.length);
-    const randomCell = emptyCells[randomIndex] ?? null;
 
-    return randomCell;
+    return emptyCells[randomIndex] ?? null;
   }
 
   function createRandomTile(randomCell: Game.GameCell) {
-    const randomValue = Math.random() >= 0.5 ? 4 : 2;
-
-    const randomTile: Game.GameTile = {
+    return {
       ...randomCell,
-      value: randomValue,
+      value: Math.random() >= 0.5 ? 4 : 2,
     };
-
-    return randomTile;
   }
 
-  function sortTiles(tiles: Game.GameTile[], direction: Direction) {
-    const sortFn = (a: Game.GameTile, b: Game.GameTile) => {
+  function createInitialTiles() {
+    let nextTiles: Game.GameTile[] = [];
+
+    for (let index = 0; index < startingTile; index++) {
+      const emptyCells = getEmptyCells(nextTiles);
+      const randomCell = getRandomCell(emptyCells);
+
+      if (!randomCell) {
+        break;
+      }
+
+      nextTiles = [...nextTiles, createRandomTile(randomCell)];
+    }
+
+    return nextTiles;
+  }
+
+  function sortTiles(allTiles: Game.GameTile[], direction: Direction) {
+    return allTiles.toSorted((a, b) => {
       if (direction === "left") return a.column - b.column;
       if (direction === "right") return b.column - a.column;
       if (direction === "up") return a.row - b.row;
 
       return b.row - a.row;
-    };
-
-    const sortedTiles = tiles.toSorted(sortFn);
-
-    return sortedTiles;
+    });
   }
 
-  function groupTiles(tiles: Game.GameTile[], isHorizontal: boolean) {
-    const groupFn = (tile: Game.GameTile) =>
-      isHorizontal ? tile.row : tile.column;
-
-    const groupedTiles = Object.groupBy(tiles, groupFn);
-
-    return groupedTiles;
+  function groupTiles(allTiles: Game.GameTile[], isHorizontal: boolean) {
+    return Object.groupBy(allTiles, (tile) =>
+      isHorizontal ? tile.row : tile.column,
+    );
   }
 
   function mergeTiles(
@@ -89,138 +105,199 @@ function useGameBoard({
     row: number,
     column: number,
   ) {
-    const tile: Game.GameTile = {
+    return {
       ...currentTile,
       value: currentTile.value + nextTile.value,
       row,
       column,
     };
-
-    return tile;
   }
 
-  function moveTiles(tiles: Game.GameTile[], direction: Direction) {
+  function computeMovedTiles(allTiles: Game.GameTile[], direction: Direction) {
     const isHorizontal = direction === "left" || direction === "right";
     const maximumPosition = isHorizontal ? columns : rows;
 
-    const sortedTiles = sortTiles(tiles, direction);
+    const sortedTiles = sortTiles(allTiles, direction);
     const groupedTiles = groupTiles(sortedTiles, isHorizontal);
 
     let nextTiles: Game.GameTile[] = [];
     let hasMoved = false;
 
-    for (const [group, currentTiles = []] of Object.entries(groupedTiles)) {
-      const currentPosition = parseInt(group, 10);
-      let nextPosition =
+    for (const [group, groupedTilesEntry = []] of Object.entries(
+      groupedTiles,
+    )) {
+      const fixedPosition = parseInt(group, 10);
+      const lineTiles = [...groupedTilesEntry];
+
+      let targetPosition =
         direction === "left" || direction === "up" ? 1 : maximumPosition;
 
-      while (currentTiles.length > 0) {
-        const currentTile = currentTiles.shift()!;
-        const nextTile = currentTiles[0];
+      while (lineTiles.length > 0) {
+        const currentTile = lineTiles.shift()!;
+        const nextTile = lineTiles[0];
 
         if (nextTile && nextTile.value === currentTile.value) {
           hasMoved = true;
+          lineTiles.shift();
 
-          currentTiles.shift();
-
-          const tile = mergeTiles(
-            currentTile,
-            nextTile,
-            isHorizontal ? currentPosition : nextPosition,
-            isHorizontal ? nextPosition : currentPosition,
-          );
-
-          nextTiles = [...nextTiles, tile];
+          nextTiles = [
+            ...nextTiles,
+            mergeTiles(
+              currentTile,
+              nextTile,
+              isHorizontal ? fixedPosition : targetPosition,
+              isHorizontal ? targetPosition : fixedPosition,
+            ),
+          ];
         } else {
-          const isMatched =
-            (isHorizontal && currentTile.column !== nextPosition) ||
-            (!isHorizontal && currentTile.row !== nextPosition);
+          const didChangePosition =
+            (isHorizontal && currentTile.column !== targetPosition) ||
+            (!isHorizontal && currentTile.row !== targetPosition);
 
-          if (isMatched) {
+          if (didChangePosition) {
             hasMoved = true;
           }
 
-          const tile: Game.GameTile = {
-            ...currentTile,
-            row: isHorizontal ? currentPosition : nextPosition,
-            column: isHorizontal ? nextPosition : currentPosition,
-          };
-
-          nextTiles = [...nextTiles, tile];
+          nextTiles = [
+            ...nextTiles,
+            {
+              ...currentTile,
+              row: isHorizontal ? fixedPosition : targetPosition,
+              column: isHorizontal ? targetPosition : fixedPosition,
+            },
+          ];
         }
 
-        nextPosition += direction === "left" || direction === "up" ? 1 : -1;
+        targetPosition += direction === "left" || direction === "up" ? 1 : -1;
       }
     }
 
-    if (hasMoved) {
-      historyIndexRef.current += 1;
-      historiesRef.current.set(historyIndexRef.current, tiles);
-
-      const emptyCells = getEmptyCells(nextTiles);
-      const randomCell = getRandomCell(emptyCells);
-
-      if (randomCell) {
-        const randomTile = createRandomTile(randomCell);
-        nextTiles = [...nextTiles, randomTile];
-      }
+    if (!hasMoved) {
+      return { nextTiles: allTiles, hasMoved: false };
     }
 
-    return nextTiles;
+    const emptyCells = getEmptyCells(nextTiles);
+    const randomCell = getRandomCell(emptyCells);
+
+    if (randomCell) {
+      nextTiles = [...nextTiles, createRandomTile(randomCell)];
+    }
+
+    return { nextTiles, hasMoved: true };
   }
 
-  const canUndo = historyIndexRef.current > 0;
+  function reducer(
+    state: GameBoardState,
+    action: GameBoardAction,
+  ): GameBoardState {
+    if (action.type === "initialize") {
+      const initialTiles = cloneTiles(action.tiles);
 
-  function undo() {
-    if (historyIndexRef.current <= 0) {
-      return;
+      return {
+        tiles: initialTiles,
+        histories: [initialTiles],
+        historyIndex: 0,
+      };
     }
 
-    setTiles((tiles) => {
-      const foundHistory = historiesRef.current.get(historyIndexRef.current);
+    if (action.type === "move") {
+      const { nextTiles, hasMoved } = computeMovedTiles(
+        state.tiles,
+        action.direction,
+      );
 
-      if (!foundHistory) {
-        return tiles;
+      if (!hasMoved) {
+        return state;
       }
 
-      historyIndexRef.current -= 1;
+      const nextHistoryIndex = state.historyIndex + 1;
+      const trimmedHistories = state.histories.slice(0, nextHistoryIndex);
+      const clonedNextTiles = cloneTiles(nextTiles);
 
-      return foundHistory;
-    });
+      return {
+        tiles: clonedNextTiles,
+        histories: [...trimmedHistories, clonedNextTiles],
+        historyIndex: nextHistoryIndex,
+      };
+    }
+
+    if (action.type === "undo") {
+      if (state.historyIndex <= 0) {
+        return state;
+      }
+
+      const nextHistoryIndex = state.historyIndex - 1;
+      const previousTiles = state.histories[nextHistoryIndex];
+
+      if (!previousTiles) {
+        return state;
+      }
+
+      return {
+        ...state,
+        tiles: cloneTiles(previousTiles),
+        historyIndex: nextHistoryIndex,
+      };
+    }
+
+    if (action.type === "redo") {
+      if (state.historyIndex >= state.histories.length - 1) {
+        return state;
+      }
+
+      const nextHistoryIndex = state.historyIndex + 1;
+      const nextTiles = state.histories[nextHistoryIndex];
+
+      if (!nextTiles) {
+        return state;
+      }
+
+      return {
+        ...state,
+        tiles: cloneTiles(nextTiles),
+        historyIndex: nextHistoryIndex,
+      };
+    }
+
+    return state;
   }
+
+  const [state, dispatch] = React.useReducer(reducer, {
+    tiles: [],
+    histories: [],
+    historyIndex: 0,
+  });
 
   React.useEffect(() => {
-    setTiles((tiles) => {
-      for (let i = 0; i < startingTile; i++) {
-        const emptyCells = getEmptyCells(tiles);
-        const randomCell = getRandomCell(emptyCells);
+    const initialTiles = createInitialTiles();
+    dispatch({ type: "initialize", tiles: initialTiles });
+  }, [rows, columns, startingTile]);
 
-        if (randomCell) {
-          const randomTile = createRandomTile(randomCell);
+  function moveTiles(direction: Direction) {
+    dispatch({ type: "move", direction });
+  }
 
-          tiles = [...tiles, randomTile];
-        }
-      }
+  function undo() {
+    dispatch({ type: "undo" });
+  }
 
-      return tiles;
-    });
+  function redo() {
+    dispatch({ type: "redo" });
+  }
 
-    return () => {
-      historyIndexRef.current = 0;
-      historiesRef.current = new Map();
-    };
-  }, []);
+  const canUndo = state.historyIndex > 0;
+  const canRedo = state.historyIndex < state.histories.length - 1;
 
   return {
-    tiles,
+    tiles: state.tiles,
     cells,
     rows,
     columns,
-    history,
-    setTiles,
     moveTiles,
     undo,
+    redo,
     canUndo,
+    canRedo,
   };
 }
 
