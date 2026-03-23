@@ -113,15 +113,27 @@ function GameBoardTile({
   children,
   ...props
 }: GameBoardTileProps) {
+  const digitCount = String(value).length;
+
+  const fontSize =
+    digitCount <= 2
+      ? "text-[calc(var(--game-board-cell-dimension-width)/2)]"
+      : digitCount === 3
+        ? "text-[calc(var(--game-board-cell-dimension-width)/3)]"
+        : digitCount === 4
+          ? "text-[calc(var(--game-board-cell-dimension-width)/4)]"
+          : "text-[calc(var(--game-board-cell-dimension-width)/5)]";
+
   return (
     <GameBoardCell
       className={cn(
         "bg-primary text-primary-foreground z-10 flex items-center justify-center",
         className,
+        fontSize,
       )}
       {...props}
     >
-      <span className="animate-spawn origin-center text-[calc(var(--game-board-cell-dimension-width)/2)] leading-[calc(var(--game-board-cell-dimension-height)/2)] font-semibold transition-transform select-none">
+      <span className="animate-spawn origin-center font-semibold transition-transform select-none">
         {value}
       </span>
     </GameBoardCell>
