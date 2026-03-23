@@ -6,6 +6,10 @@ import {
 } from "@/components/game/game-board";
 import { useGameBoard } from "@/hooks/game/use-game-board";
 import { tileColors } from "@/data/colors";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Button } from "@/components/ui/button";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Redo02Icon, Undo02Icon } from "@hugeicons/core-free-icons";
 
 function Homepage() {
   const gameBoard = useGameBoard();
@@ -60,6 +64,18 @@ function Homepage() {
           );
         })}
       </GameBoard>
+      <ButtonGroup>
+        <Button
+          size="icon-lg"
+          disabled={!gameBoard.canUndo}
+          onClick={gameBoard.undo}
+        >
+          <HugeiconsIcon icon={Undo02Icon} />
+        </Button>
+        <Button size="icon-lg">
+          <HugeiconsIcon icon={Redo02Icon} />
+        </Button>
+      </ButtonGroup>
     </div>
   );
 }

@@ -169,6 +169,8 @@ function useGameBoard({
     return nextTiles;
   }
 
+  const canUndo = historyIndexRef.current > 0;
+
   function undo() {
     if (historyIndexRef.current <= 0) {
       return;
@@ -218,6 +220,7 @@ function useGameBoard({
     setTiles,
     moveTiles,
     undo,
+    canUndo,
   };
 }
 
