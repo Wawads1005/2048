@@ -50,24 +50,25 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.52 0.105 223.128);
-  --primary-foreground: oklch(0.984 0.019 200.873);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: oklch(0.9785 0.0108 95.16);
+  --foreground: oklch(0.5145 0.0349 68.53);
+  --card: oklch(0.9735 0.012 92.5);
+  --card-foreground: oklch(0.5145 0.0349 68.53);
+  --popover: oklch(0.985 0.008 95);
+  --popover-foreground: oklch(0.5145 0.0349 68.53);
+  --primary: oklch(0.5145 0.0349 68.53);
+  --primary-foreground: oklch(0.9785 0.0108 95.16);
+  --secondary: oklch(0.924 0.0173 67.61);
+  --secondary-foreground: oklch(0.5145 0.0349 68.53);
+  --muted: oklch(0.94 0.014 82);
+  --muted-foreground: oklch(0.6 0.028 70);
+  --accent: oklch(0.9108 0.0349 82.91);
+  --accent-foreground: oklch(0.5145 0.0349 68.53);
+  --destructive: oklch(0.675 0.1933 34.36);
+  --border: oklch(0.87 0.02 78);
+  --input: oklch(0.87 0.02 78);
+  --ring: oklch(0.7595 0.1331 47.5);
+  --radius: 0.625rem;
   --game-board: oklch(0.6477 0.0299 63.7);
   --game-board-cell: oklch(0.7532 0.0352 73.07);
 }

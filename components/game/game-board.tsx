@@ -4,8 +4,8 @@ import * as React from "react";
 const GAME_BOARD_ROWS = 4;
 const GAME_BOARD_COLUMNS = 4;
 
-const GAME_BOARD_CELL_DIMENSION_WIDTH = 120;
-const GAME_BOARD_CELL_DIMENSION_HEIGHT = 120;
+const GAME_BOARD_CELL_DIMENSION_WIDTH = 100;
+const GAME_BOARD_CELL_DIMENSION_HEIGHT = 100;
 
 const GAME_BOARD_DIMENSION_OFFSET = 12;
 
@@ -50,7 +50,7 @@ function GameBoard({
     >
       <div
         className={cn(
-          "bg-game-board relative h-(--game-board-dimension-height) w-(--game-board-dimension-width) rounded-[calc(var(--game-board-dimension-offset)-var(--spacing))]",
+          "bg-game-board relative h-(--game-board-dimension-height) w-(--game-board-dimension-width) rounded-[calc(var(--game-board-dimension-offset)+var(--spacing))]",
           className,
         )}
         {...props}
@@ -121,7 +121,7 @@ function GameBoardTile({
       )}
       {...props}
     >
-      <span className="animate-spawn origin-center text-[calc(var(--game-board-cell-dimension-width)/2)] leading-[calc(var(--game-board-cell-dimension-height)/2)] font-semibold transition-transform">
+      <span className="animate-spawn origin-center text-[calc(var(--game-board-cell-dimension-width)/2)] leading-[calc(var(--game-board-cell-dimension-height)/2)] font-semibold transition-transform select-none">
         {value}
       </span>
     </GameBoardCell>
