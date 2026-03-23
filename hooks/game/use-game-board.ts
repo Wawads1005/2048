@@ -302,8 +302,10 @@ function useGameBoard({
     }
 
     if (action.type === "reset") {
+      const initialTiles = createInitialTiles();
+
       return {
-        tiles: [],
+        tiles: initialTiles,
         histories: [],
         historyIndex: 0,
       };
