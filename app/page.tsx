@@ -10,9 +10,19 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Redo02Icon, Undo02Icon } from "@hugeicons/core-free-icons";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function Homepage() {
   const gameBoard = useGameBoard();
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
   React.useEffect(() => {
     function handleMove(e: KeyboardEvent) {
@@ -36,6 +46,12 @@ function Homepage() {
       document.removeEventListener("keydown", handleMove);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (gameBoard.hasWon || gameBoard.hasLost) {
+      setIsAlertOpen(true);
+    }
+  }, [gameBoard.hasWon, gameBoard.hasLost]);
 
   function getHighestTileValue() {
     const [highestestTile] = gameBoard.tiles.toSorted(
@@ -100,6 +116,33 @@ function Homepage() {
           </Button>
         </ButtonGroup>
       </main>
+
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-semibold">
+              {gameBoard.hasLost
+                ? "You lost!"
+                : gameBoard.hasWon
+                  ? "You won!"
+                  : ""}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Wanna try again? Click new game!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => {
+                setIsAlertOpen(false);
+                gameBoard.reset();
+              }}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

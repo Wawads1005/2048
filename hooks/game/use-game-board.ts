@@ -3,11 +3,13 @@ import * as React from "react";
 const DEFAULT_GAME_BOARD_ROWS = 4;
 const DEFAULT_GAME_BOARD_COLUMNS = 4;
 const DEFAULT_GAME_BOARD_STARTING_TILE = 2;
+const DEFAULT_WINNING_TILE_VALUE = 2048;
 
 type UseGameBoardProps = {
   rows?: number;
   columns?: number;
   startingTile?: number;
+  winningTileValue?: number;
 };
 
 type Direction = "right" | "left" | "up" | "down";
@@ -22,12 +24,14 @@ type GameBoardAction =
   | { type: "initialize"; tiles: Game.GameTile[] }
   | { type: "move"; direction: Direction }
   | { type: "undo" }
-  | { type: "redo" };
+  | { type: "redo" }
+  | { type: "reset" };
 
 function useGameBoard({
   rows = DEFAULT_GAME_BOARD_ROWS,
   columns = DEFAULT_GAME_BOARD_COLUMNS,
   startingTile = DEFAULT_GAME_BOARD_STARTING_TILE,
+  winningTileValue = DEFAULT_WINNING_TILE_VALUE,
 }: UseGameBoardProps = {}) {
   const cells = React.useMemo(
     () =>
@@ -186,6 +190,44 @@ function useGameBoard({
     return { nextTiles, hasMoved: true };
   }
 
+  function hasAdjacentMerge(allTiles: Game.GameTile[]) {
+    for (const tile of allTiles) {
+      const rightNeighbor = allTiles.find(
+        (candidateTile) =>
+          candidateTile.row === tile.row &&
+          candidateTile.column === tile.column + 1,
+      );
+
+      const bottomNeighbor = allTiles.find(
+        (candidateTile) =>
+          candidateTile.column === tile.column &&
+          candidateTile.row === tile.row + 1,
+      );
+
+      if (rightNeighbor && rightNeighbor.value === tile.value) {
+        return true;
+      }
+
+      if (bottomNeighbor && bottomNeighbor.value === tile.value) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function getHasWon(allTiles: Game.GameTile[]) {
+    return allTiles.some((tile) => tile.value >= winningTileValue);
+  }
+
+  function getHasLost(allTiles: Game.GameTile[]) {
+    if (getEmptyCells(allTiles).length > 0) {
+      return false;
+    }
+
+    return !hasAdjacentMerge(allTiles);
+  }
+
   function reducer(
     state: GameBoardState,
     action: GameBoardAction,
@@ -259,6 +301,14 @@ function useGameBoard({
       };
     }
 
+    if (action.type === "reset") {
+      return {
+        tiles: [],
+        histories: [],
+        historyIndex: 0,
+      };
+    }
+
     return state;
   }
 
@@ -285,8 +335,14 @@ function useGameBoard({
     dispatch({ type: "redo" });
   }
 
+  function reset() {
+    dispatch({ type: "reset" });
+  }
+
   const canUndo = state.historyIndex > 0;
   const canRedo = state.historyIndex < state.histories.length - 1;
+  const hasWon = getHasWon(state.tiles);
+  const hasLost = getHasLost(state.tiles);
 
   return {
     tiles: state.tiles,
@@ -298,6 +354,9 @@ function useGameBoard({
     redo,
     canUndo,
     canRedo,
+    reset,
+    hasWon,
+    hasLost,
   };
 }
 
