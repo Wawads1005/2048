@@ -17,6 +17,8 @@ function useGameBoard({
   columns = DEFAULT_GAME_BOARD_COLUMNS,
   startingTile = DEFAULT_GAME_BOARD_STARTING_TILE,
 }: UseGameBoardProps = {}) {
+  const historyIndexRef = React.useRef(0);
+  const historiesRef = React.useRef<Map<number, Game.GameTile[]>>(new Map());
   const [tiles, setTiles] = React.useState<Game.GameTile[]>([]);
   const cells = React.useMemo(
     () =>
@@ -152,6 +154,9 @@ function useGameBoard({
     }
 
     if (hasMoved) {
+      historyIndexRef.current += 1;
+      historiesRef.current.set(historiesRef.current.size + 1, tiles);
+
       const emptyCells = getEmptyCells(nextTiles);
       const randomCell = getRandomCell(emptyCells);
 
@@ -162,6 +167,24 @@ function useGameBoard({
     }
 
     return nextTiles;
+  }
+
+  function undo() {
+    if (historyIndexRef.current <= 0) {
+      return;
+    }
+
+    setTiles((tiles) => {
+      const foundHistory = historiesRef.current.get(historyIndexRef.current);
+
+      if (!foundHistory) {
+        return tiles;
+      }
+
+      historyIndexRef.current -= 1;
+
+      return foundHistory;
+    });
   }
 
   React.useEffect(() => {
@@ -179,6 +202,11 @@ function useGameBoard({
 
       return tiles;
     });
+
+    return () => {
+      historyIndexRef.current = 0;
+      historiesRef.current = new Map();
+    };
   }, []);
 
   return {
@@ -186,8 +214,10 @@ function useGameBoard({
     cells,
     rows,
     columns,
+    history,
     setTiles,
     moveTiles,
+    undo,
   };
 }
 

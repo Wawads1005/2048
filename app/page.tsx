@@ -12,6 +12,10 @@ function Homepage() {
 
   React.useEffect(() => {
     function handleMove(e: KeyboardEvent) {
+      if (e.ctrlKey && e.key === "z") {
+        gameBoard.undo();
+      }
+
       gameBoard.setTiles((tiles) => {
         if (e.key === "ArrowRight") return gameBoard.moveTiles(tiles, "right");
         if (e.key === "ArrowLeft") return gameBoard.moveTiles(tiles, "left");
