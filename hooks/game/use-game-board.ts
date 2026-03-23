@@ -155,7 +155,7 @@ function useGameBoard({
 
     if (hasMoved) {
       historyIndexRef.current += 1;
-      historiesRef.current.set(historiesRef.current.size + 1, tiles);
+      historiesRef.current.set(historyIndexRef.current, tiles);
 
       const emptyCells = getEmptyCells(nextTiles);
       const randomCell = getRandomCell(emptyCells);
