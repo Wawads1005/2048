@@ -4,17 +4,6 @@ import * as React from "react";
 const GAME_BOARD_ROWS = 4;
 const GAME_BOARD_COLUMNS = 4;
 
-const GAME_BOARD_CELL_DIMENSION_WIDTH = 100;
-const GAME_BOARD_CELL_DIMENSION_HEIGHT = 100;
-
-const GAME_BOARD_DIMENSION_OFFSET = 12;
-
-interface GameBoardDimension {
-  height: number;
-  width: number;
-  offset: number;
-}
-
 interface GameBoardProps extends React.ComponentProps<"div"> {
   rows?: number;
   columns?: number;
@@ -26,27 +15,15 @@ function GameBoard({
   className,
   ...props
 }: GameBoardProps) {
-  const dimension: GameBoardDimension = {
-    width:
-      (GAME_BOARD_CELL_DIMENSION_WIDTH + GAME_BOARD_DIMENSION_OFFSET) *
-        columns +
-      GAME_BOARD_DIMENSION_OFFSET,
-    offset: GAME_BOARD_DIMENSION_OFFSET,
-    height:
-      (GAME_BOARD_CELL_DIMENSION_HEIGHT + GAME_BOARD_DIMENSION_OFFSET) * rows +
-      GAME_BOARD_DIMENSION_OFFSET,
-  };
-
   return (
     <div
-      className="inline-flex"
       style={
         {
-          "--game-board-dimension-width": `${dimension.width}px`,
-          "--game-board-dimension-height": `${dimension.height}px`,
-          "--game-board-dimension-offset": `${dimension.offset}px`,
+          "--game-board-dimension-width": `calc((var(--game-board-cell-dimension-width) + var(--game-board-dimension-offset)) * ${columns} + var(--game-board-dimension-offset))`,
+          "--game-board-dimension-height": `calc((var(--game-board-cell-dimension-height) + var(--game-board-dimension-offset)) * ${rows} + var(--game-board-dimension-offset))`,
         } as React.CSSProperties
       }
+      className="inline-flex [--game-board-cell-dimension-height:--spacing(25)] [--game-board-cell-dimension-width:--spacing(25)] [--game-board-dimension-offset:--spacing(3)]"
     >
       <div
         className={cn(
@@ -59,11 +36,6 @@ function GameBoard({
   );
 }
 
-interface GameBoardCellDimension {
-  width: number;
-  height: number;
-}
-
 interface GameBoardCellProps extends React.ComponentProps<"div"> {
   row: number;
   column: number;
@@ -72,21 +44,13 @@ interface GameBoardCellProps extends React.ComponentProps<"div"> {
 function GameBoardCell({
   row,
   column,
-
   className,
   ...props
 }: GameBoardCellProps) {
-  const dimension: GameBoardCellDimension = {
-    height: GAME_BOARD_CELL_DIMENSION_HEIGHT,
-    width: GAME_BOARD_CELL_DIMENSION_WIDTH,
-  };
-
   return (
     <div
       style={
         {
-          "--game-board-cell-dimension-width": `${dimension.width}px`,
-          "--game-board-cell-dimension-height": `${dimension.height}px`,
           "--game-board-cell-position-x": `calc((var(--game-board-cell-dimension-width) + var(--game-board-dimension-offset)) * ${column - 1} + var(--game-board-dimension-offset))`,
           "--game-board-cell-position-y": `calc((var(--game-board-cell-dimension-height) + var(--game-board-dimension-offset)) * ${row - 1} + var(--game-board-dimension-offset))`,
         } as React.CSSProperties
