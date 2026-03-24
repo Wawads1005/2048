@@ -43,6 +43,11 @@ function useGameBoard({
       }),
     [rows, columns],
   );
+  const [state, dispatch] = React.useReducer(reducer, {
+    tiles: [],
+    histories: [],
+    historyIndex: 0,
+  });
 
   function cloneTiles(allTiles: Game.GameTile[]) {
     return allTiles.map((tile) => ({ ...tile }));
@@ -232,93 +237,91 @@ function useGameBoard({
     state: GameBoardState,
     action: GameBoardAction,
   ): GameBoardState {
-    if (action.type === "initialize") {
-      const initialTiles = cloneTiles(action.tiles);
+    switch (action.type) {
+      case "initialize": {
+        const initialTiles = cloneTiles(action.tiles);
 
-      return {
-        tiles: initialTiles,
-        histories: [initialTiles],
-        historyIndex: 0,
-      };
-    }
-
-    if (action.type === "move") {
-      const { nextTiles, hasMoved } = computeMovedTiles(
-        state.tiles,
-        action.direction,
-      );
-
-      if (!hasMoved) {
-        return state;
+        return {
+          tiles: initialTiles,
+          histories: [initialTiles],
+          historyIndex: 0,
+        };
       }
 
-      const nextHistoryIndex = state.historyIndex + 1;
-      const trimmedHistories = state.histories.slice(0, nextHistoryIndex);
-      const clonedNextTiles = cloneTiles(nextTiles);
+      case "move": {
+        const { nextTiles, hasMoved } = computeMovedTiles(
+          state.tiles,
+          action.direction,
+        );
 
-      return {
-        tiles: clonedNextTiles,
-        histories: [...trimmedHistories, clonedNextTiles],
-        historyIndex: nextHistoryIndex,
-      };
-    }
+        if (!hasMoved) {
+          return state;
+        }
 
-    if (action.type === "undo") {
-      if (state.historyIndex <= 0) {
-        return state;
+        const nextHistoryIndex = state.historyIndex + 1;
+        const trimmedHistories = state.histories.slice(0, nextHistoryIndex);
+        const clonedNextTiles = cloneTiles(nextTiles);
+
+        return {
+          tiles: clonedNextTiles,
+          histories: [...trimmedHistories, clonedNextTiles],
+          historyIndex: nextHistoryIndex,
+        };
       }
 
-      const nextHistoryIndex = state.historyIndex - 1;
-      const previousTiles = state.histories[nextHistoryIndex];
+      case "undo": {
+        if (state.historyIndex <= 0) {
+          return state;
+        }
 
-      if (!previousTiles) {
-        return state;
+        const nextHistoryIndex = state.historyIndex - 1;
+        const previousTiles = state.histories[nextHistoryIndex];
+
+        if (!previousTiles) {
+          return state;
+        }
+
+        return {
+          ...state,
+          tiles: cloneTiles(previousTiles),
+          historyIndex: nextHistoryIndex,
+        };
       }
 
-      return {
-        ...state,
-        tiles: cloneTiles(previousTiles),
-        historyIndex: nextHistoryIndex,
-      };
-    }
+      case "redo": {
+        if (state.historyIndex >= state.histories.length - 1) {
+          return state;
+        }
 
-    if (action.type === "redo") {
-      if (state.historyIndex >= state.histories.length - 1) {
-        return state;
+        const nextHistoryIndex = state.historyIndex + 1;
+        const nextTiles = state.histories[nextHistoryIndex];
+
+        if (!nextTiles) {
+          return state;
+        }
+
+        return {
+          ...state,
+          tiles: cloneTiles(nextTiles),
+          historyIndex: nextHistoryIndex,
+        };
       }
 
-      const nextHistoryIndex = state.historyIndex + 1;
-      const nextTiles = state.histories[nextHistoryIndex];
+      case "reset": {
+        const initialTiles = createInitialTiles();
 
-      if (!nextTiles) {
-        return state;
+        return {
+          tiles: initialTiles,
+          histories: [],
+          historyIndex: 0,
+        };
       }
 
-      return {
-        ...state,
-        tiles: cloneTiles(nextTiles),
-        historyIndex: nextHistoryIndex,
-      };
+      default: {
+        return state;
+      }
     }
-
-    if (action.type === "reset") {
-      const initialTiles = createInitialTiles();
-
-      return {
-        tiles: initialTiles,
-        histories: [],
-        historyIndex: 0,
-      };
-    }
-
-    return state;
   }
-
-  const [state, dispatch] = React.useReducer(reducer, {
-    tiles: [],
-    histories: [],
-    historyIndex: 0,
-  });
 
   React.useEffect(() => {
     const initialTiles = createInitialTiles();
