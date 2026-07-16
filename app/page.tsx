@@ -20,8 +20,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+interface TouchPosition {
+  x: number;
+  y: number;
+}
+
+const TOUCH_THRESHOLD = 30;
+
 function Homepage() {
   const gameBoard = useGameBoard();
+  const [touchPosition, setTouchPosition] = React.useState<TouchPosition>({
+    x: 0,
+    y: 0,
+  });
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -40,38 +51,68 @@ function Homepage() {
       if (e.key === "ArrowDown") return gameBoard.moveTiles("down");
     }
 
-    let startX = 0;
-    let startY = 0;
-
     function handleTouchStart(e: TouchEvent) {
-      startX = e.touches[0]?.clientX ?? 0;
-      startY = e.touches[0]?.clientY ?? 0;
+      // Initially set the touch position when the user starts touching the screen
+      setTouchPosition(() => {
+        const touch = e.touches[0];
+
+        if (!touch) {
+          return {
+            x: 0,
+            y: 0,
+          };
+        }
+
+        return {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
+      });
     }
 
     function handleTouchEnd(e: TouchEvent) {
-      const endX = e.changedTouches[0]?.clientX ?? 0;
-      const endY = e.changedTouches[0]?.clientY ?? 0;
+      const changedTouch = e.changedTouches[0];
 
-      const deltaX = endX - startX;
-      const deltaY = endY - startY;
-
-      if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) {
+      if (!changedTouch) {
         return;
       }
 
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX > 0) {
+      const endX = changedTouch.clientX;
+      const endY = changedTouch.clientY;
+
+      const deltaX = endX - touchPosition.x;
+      const deltaY = endY - touchPosition.y;
+
+      const isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
+      const isVerticalSwipe = Math.abs(deltaY) > Math.abs(deltaX);
+      const isMinimalSwipe =
+        Math.abs(deltaX) < TOUCH_THRESHOLD &&
+        Math.abs(deltaY) < TOUCH_THRESHOLD;
+
+      switch (true) {
+        case isHorizontalSwipe && deltaX > 0:
           gameBoard.moveTiles("right");
-        } else {
+          break;
+        case isHorizontalSwipe && deltaX < 0:
           gameBoard.moveTiles("left");
-        }
-      } else {
-        if (deltaY > 0) {
+          break;
+        case isVerticalSwipe && deltaY > 0:
           gameBoard.moveTiles("down");
-        } else {
+          break;
+        case isVerticalSwipe && deltaY < 0:
           gameBoard.moveTiles("up");
-        }
+          break;
+        case isMinimalSwipe:
+          break;
+        default:
+          break;
       }
+
+      // Reset touch position after handling the swipe
+      setTouchPosition({
+        x: 0,
+        y: 0,
+      });
     }
 
     document.addEventListener("keydown", handleMove);
