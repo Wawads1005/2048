@@ -40,12 +40,54 @@ function Homepage() {
       if (e.key === "ArrowDown") return gameBoard.moveTiles("down");
     }
 
+    let startX = 0;
+    let startY = 0;
+
+    function handleTouchStart(e: TouchEvent) {
+      startX = e.touches[0]?.clientX ?? 0;
+      startY = e.touches[0]?.clientY ?? 0;
+    }
+
+    function handleTouchEnd(e: TouchEvent) {
+      const endX = e.changedTouches[0]?.clientX ?? 0;
+      const endY = e.changedTouches[0]?.clientY ?? 0;
+
+      const deltaX = endX - startX;
+      const deltaY = endY - startY;
+
+      if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30) {
+        return;
+      }
+
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 0) {
+          gameBoard.moveTiles("right");
+        } else {
+          gameBoard.moveTiles("left");
+        }
+      } else {
+        if (deltaY > 0) {
+          gameBoard.moveTiles("down");
+        } else {
+          gameBoard.moveTiles("up");
+        }
+      }
+    }
+
     document.addEventListener("keydown", handleMove);
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    document.addEventListener("touchend", handleTouchEnd, {
+      passive: true,
+    });
 
     return () => {
       document.removeEventListener("keydown", handleMove);
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, []);
+  }, [gameBoard]);
 
   React.useEffect(() => {
     if (gameBoard.hasWon || gameBoard.hasLost) {
