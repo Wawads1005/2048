@@ -23,7 +23,7 @@ function GameBoard({
           "--game-board-dimension-height": `calc((var(--game-board-cell-dimension-height) + var(--game-board-dimension-offset)) * ${rows} + var(--game-board-dimension-offset))`,
         } as React.CSSProperties
       }
-      className="inline-flex [--game-board-cell-dimension-height:--spacing(25)] [--game-board-cell-dimension-width:--spacing(25)] [--game-board-dimension-offset:--spacing(3)]"
+      className="inline-flex [--game-board-cell-dimension-height:--spacing(25)] [--game-board-cell-dimension-width:--spacing(25)] [--game-board-dimension-offset:--spacing(3)] [--spacing:0.15rem] md:[--spacing:0.25rem]"
     >
       <div
         className={cn(
